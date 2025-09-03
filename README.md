@@ -31,3 +31,36 @@ HHT10_2,SRR26030908,HHT10,2
 HHT15_1,SRR26030905,HHT15,1
 HHT15_2,SRR26030906,HHT15,2
 ~~~
+## 1) Download FASTQs
+*bash*
+~~~
+mkdir -p raw/
+cut -d, -f2 meta/metadata.csv | tail -n +2 | while read SRR; do
+  fasterq-dump $SRR --split-files --gzip -O raw/
+done
+~~~
+This will produce files like (for paired-end data):
+
+- raw/SRR26030905_1.fastq.gz
+
+- raw/SRR26030905_2.fastq.gz
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
