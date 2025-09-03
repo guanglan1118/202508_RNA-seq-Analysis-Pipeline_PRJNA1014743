@@ -18,7 +18,7 @@ project_PRJNA1014743/
 ~~~
 ## 0) Get the SRR runs & metadata (SRA → FASTQ)
 On the PRJNA1014743 page, click “Send to” → “Run Selector” → “Run Selector” → "Download Metadata/Accession List". 
-Save as **meta/metadata.csv**
+Save as **metadata.csv**
 Edit a minimal metadata.csv with columns:
 
 *CSV*
