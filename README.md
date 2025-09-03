@@ -35,7 +35,7 @@ HHT15_2,SRR26030906,HHT15,2
 *bash*
 ~~~
 mkdir -p raw/
-cut -d, -f2 meta/metadata.csv | tail -n +2 | while read SRR; do
+cut -d, -f2 metadata.csv | tail -n +2 | while read SRR; do
   fasterq-dump $SRR --split-files --gzip -O raw/
 done
 ~~~
