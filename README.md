@@ -45,7 +45,7 @@ This will produce files like (for paired-end data):
 
 - raw/SRR26030905_2.fastq.gz
 
-
+## 2) Download FASTQsDifferential Expression Design
 
 
 
