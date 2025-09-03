@@ -17,16 +17,16 @@ project_PRJNA1014743/
 └─ results/          # DE tables, plots, GSEA
 ~~~
 ## 0) Get the SRR runs & metadata (SRA → FASTQ)
-On the PRJNA1014743 page, click “SRA Experiments (6)” → “Run Selector” → Download the table (CSV). Save as meta/sra_run_table.csv.
+On the PRJNA1014743 page, click “Send to” → “Run Selector” → “Run Selector” → "Download Metadata/Accession List". Save as meta/metadata.csv.
 Edit a minimal metadata.csv with columns:
 
 *CSV*
 ~~~
-sample_id,condition,replicate,SRR
-CTRL_1,control,1,SRRXXXXXXXX
-CTRL_2,control,2,SRRXXXXXXXX
-CTRL_3,control,3,SRRXXXXXXXX
-HHT_1,HHT,1,SRRXXXXXXXX
-HHT_2,HHT,2,SRRXXXXXXXX
-HHT_3,HHT,3,SRRXXXXXXXX
+sample_id,SRR,condition,replicate
+CTRL_1,SRR26030909,control,1
+CTRL_2,SRR26030910,control,2
+HHT10_1,SRR26030907,HHT10,1
+HHT10_2,SRR26030908,HHT10,2
+HHT15_1,SRR26030905,HHT15,1
+HHT15_2,SRR26030906,HHT15,2
 ~~~
