@@ -46,7 +46,20 @@ This will produce files like (for paired-end data):
 - raw/SRR26030905_2.fastq.gz
 
 ## 2) Download FASTQsDifferential Expression Design
+**Since you have 3 groups**:
 
+control (PBS)
+
+HHT10
+
+HHT15
+
+Your DESeq2 design should be:
+
+r
+~~~
+dds <- DESeqDataSetFromTximport(txi, colData=coldata, design=~ condition)
+~~~
 
 
 
