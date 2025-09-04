@@ -57,9 +57,9 @@ done
 ~~~
 This will produce files like (for paired-end data):
 
-- raw/SRR26030905_1.fastq.gz
+- raw/SRR26030905_1.fastq.gz (R1, forward)
 
-- raw/SRR26030905_2.fastq.gz
+- raw/SRR26030905_2.fastq.gz (R2, reverse)
 
 ## 2) Download FASTQsDifferential Expression Design
 **Since you have 3 groups**: control (PBS); HHT10; HHT15
