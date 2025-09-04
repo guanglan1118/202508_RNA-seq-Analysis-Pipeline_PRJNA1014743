@@ -1,4 +1,4 @@
-me se# RNA-seq Analysis Pipeline
+# RNA-seq Analysis Pipeline
 ## Datasets
 - dataset PRJNA1014743 (Jurkat T-ALL cells ± homoharringtonine, HHT)
 - Blood. 2024 /  PMID: 38968151
@@ -43,7 +43,7 @@ conda activate sra
 which fasterq-dump
 fasterq-dump --version  #fasterq-dump : 3.2.1  
 ~~~
-
+**Downloads the sequencing run from NCBI SRA** 
 ~~~
 # bash
 mkdir -p raw/
