@@ -23,7 +23,7 @@ On the PRJNA1014743 page, click “Send to” → “Run Selector” → “Run 
 Save as **metadata.csv**
 Edit a minimal metadata.csv with columns:
 
-! [metadata.csv] (metadata.png)
+! [metadata.csv] (202508/metadata.png)
 ~~~
 ! [metadata.csv] ()
 # CSV
