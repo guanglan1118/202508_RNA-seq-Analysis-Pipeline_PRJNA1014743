@@ -57,6 +57,7 @@ cut -d, -f2 meta/metadata.csv | tail -n +2 | tr -d '\r' | while read -r SRR; do
   pigz -p 8 raw/"${SRR}"_*.fastq   # or: gzip raw/"${SRR}"_*.fastq
 done
 ~~~
+
 This will produce files like:
 
 - raw/SRR26030905/SRR26030905.sra
@@ -65,7 +66,7 @@ This will produce files like:
 - raw/SRR26030908/SRR26030908.sra
 - raw/SRR26030909/SRR26030909.sra
 - raw/SRR26030910/SRR26030910.sra
-~~~
+
 
 ~~~
 find raw -type f -name "*.sra" -print0 | xargs -0 -P 6 -I{} bash -lc '
