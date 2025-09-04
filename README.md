@@ -49,8 +49,9 @@ fasterq-dump --version  #fasterq-dump : 3.2.1
 **Downloads the sequencing run from NCBI SRA** 
 ~~~
 # bash
+pwd # 
 mkdir -p raw/
-cut -d, -f2 metadata.csv | tail -n +2 | while read SRR; do
+cut -d, -f2 meta/metadata.csv | tail -n +2 | while read SRR; do
   fasterq-dump $SRR --split-files --gzip -O raw/
 done
 ~~~
@@ -63,8 +64,8 @@ This will produce files like (for paired-end data):
 ## 2) Download FASTQsDifferential Expression Design
 **Since you have 3 groups**: control (PBS); HHT10; HHT15
 Your DESeq2 design should be:
-*r*
 ~~~
+# r 
 dds <- DESeqDataSetFromTximport(txi, colData=coldata, design=~ condition)
 ~~~
 
