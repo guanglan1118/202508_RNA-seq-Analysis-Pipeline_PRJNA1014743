@@ -5,8 +5,8 @@ me se# RNA-seq Analysis Pipeline
 - Homoharringtonine inhibits the NOTCH/MYC pathway and exhibits antitumor effects in T-cell acute lymphoblastic leukemia
 
 ## Folder layout
-*bash*
 ~~~
+# bash
 project_PRJNA1014743/
 ├─ raw/              # FASTQs
 ├─ ref/              # reference (Salmon index, GTF/FA)
@@ -21,8 +21,8 @@ On the PRJNA1014743 page, click “Send to” → “Run Selector” → “Run 
 Save as **metadata.csv**
 Edit a minimal metadata.csv with columns:
 
-*CSV*
 ~~~
+# CSV
 sample_id,SRR,condition,replicate
 CTRL_1,SRR26030909,control,1
 CTRL_2,SRR26030910,control,2
@@ -34,6 +34,7 @@ HHT15_2,SRR26030906,HHT15,2
 ## 1) Download FASTQs
 **intsall fasterq-dump** 
 ~~~
+# bash
 # Create a dedicated environment
 conda create -n sra -c bioconda -c conda-forge sra-tools pigz
 conda activate sra
@@ -43,10 +44,8 @@ which fasterq-dump
 fasterq-dump --version  #fasterq-dump : 3.2.1  
 ~~~
 
-
-
-*bash*
 ~~~
+# bash
 mkdir -p raw/
 cut -d, -f2 metadata.csv | tail -n +2 | while read SRR; do
   fasterq-dump $SRR --split-files --gzip -O raw/
