@@ -68,19 +68,37 @@ This will produce files like:
 ~~~
 
 ~~~
+find raw -type f -name "*.sra" -print0 | xargs -0 -P 6 -I{} bash -lc '
+  set -e
+  f="{}"; base=$(basename "$f" .sra)
+  echo "[RUN] $base -> fastq_out/"
 
+  /research/groups/yanggrp/home/glin/miniconda3/envs/sra/bin/fasterq-dump \
+    --split-3 --skip-technical --threads 8 -O fastq_out "$f"
 
-
-
-
-
+  # compress outputs (works for single-end or paired)
+  shopt -s nullglob
+  if command -v pigz >/dev/null; then
+    pigz -p 8 fastq_out/${base}*.fastq
+  else
+    gzip -f fastq_out/${base}*.fastq
+  fi
+'
 ~~~
+This will produce files like:
 
-
-
-
-
-
+- fastq_out/SRR26030905_1.fastq
+- fastq_out/SRR26030905_2.fastq
+- fastq_out/SRR26030906_1.fastq
+- fastq_out/SRR26030906_2.fastq
+- fastq_out/SRR26030907_1.fastq
+- fastq_out/SRR26030907_2.fastq
+- fastq_out/SRR26030908_1.fastq
+- fastq_out/SRR26030908_2.fastq
+- fastq_out/SRR26030909_1.fastq
+- fastq_out/SRR26030909_2.fastq
+- fastq_out/SRR26030910_1.fastq
+- fastq_out/SRR26030910_2.fastq
 
 ## 2) Download FASTQsDifferential Expression Design
 **Since you have 3 groups**: control (PBS); HHT10; HHT15
