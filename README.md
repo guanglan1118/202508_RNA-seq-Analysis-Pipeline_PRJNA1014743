@@ -25,7 +25,6 @@ Edit a minimal metadata.csv with columns:
 
 ![metadata.csv](metadata.png)
 
-~~~
 ## 1) Download FASTQs
 **intsall fasterq-dump** 
 
