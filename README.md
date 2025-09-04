@@ -32,6 +32,19 @@ HHT15_1,SRR26030905,HHT15,1
 HHT15_2,SRR26030906,HHT15,2
 ~~~
 ## 1) Download FASTQs
+**intsall fasterq-dump** 
+~~~
+# Create a dedicated environment
+conda create -n sra -c bioconda -c conda-forge sra-tools pigz
+conda activate sra
+
+# Verify installation
+which fasterq-dump
+fasterq-dump --version  #fasterq-dump : 3.2.1  
+~~~
+
+
+
 *bash*
 ~~~
 mkdir -p raw/
@@ -48,7 +61,6 @@ This will produce files like (for paired-end data):
 ## 2) Download FASTQsDifferential Expression Design
 **Since you have 3 groups**: control (PBS); HHT10; HHT15
 Your DESeq2 design should be:
-
 *r*
 ~~~
 dds <- DESeqDataSetFromTximport(txi, colData=coldata, design=~ condition)
