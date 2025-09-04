@@ -33,6 +33,7 @@ HHT15_2,SRR26030906,HHT15,2
 ~~~
 ## 1) Download FASTQs
 **intsall fasterq-dump** 
+*fasterq-dump does not support --gzip* 
 ~~~
 # bash
 # Create a dedicated environment
