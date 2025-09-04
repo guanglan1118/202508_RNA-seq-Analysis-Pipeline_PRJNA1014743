@@ -23,7 +23,7 @@ On the PRJNA1014743 page, click “Send to” → “Run Selector” → “Run 
 Save as **metadata.csv**
 Edit a minimal metadata.csv with columns:
 
-![metadata.csv](fihures/metadata.png)
+![metadata.csv](figures/metadata.png)
 
 ## 1) Download FASTQs
 **intsall fasterq-dump** 
