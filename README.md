@@ -26,16 +26,6 @@ Edit a minimal metadata.csv with columns:
 ![metadata.csv](metadata.png)
 
 ~~~
-! [metadata.csv] ()
-# CSV
-sample_id,SRR,condition,replicate
-CTRL_1,SRR26030909,control,1
-CTRL_2,SRR26030910,control,2
-HHT10_1,SRR26030907,HHT10,1
-HHT10_2,SRR26030908,HHT10,2
-HHT15_1,SRR26030905,HHT15,1
-HHT15_2,SRR26030906,HHT15,2
-~~~
 ## 1) Download FASTQs
 **intsall fasterq-dump** 
 
