@@ -49,17 +49,22 @@ fasterq-dump --version  #fasterq-dump : 3.2.1
 **Downloads the sequencing run from NCBI SRA** 
 ~~~
 # bash
-pwd # 
-mkdir -p raw/
-cut -d, -f2 meta/metadata.csv | tail -n +2 | while read SRR; do
-  fasterq-dump $SRR --split-files --gzip -O raw/
+pwd # project_PRJNA1014743
+
+cut -d, -f2 meta/metadata.csv | tail -n +2 | tr -d '\r' | while read -r SRR; do
+  echo "Processing $SRR ..."
+  fasterq-dump "$SRR" -e 8 --split-files -t tmp -O raw/
+  pigz -p 8 raw/"${SRR}"_*.fastq   # or: gzip raw/"${SRR}"_*.fastq
 done
 ~~~
-This will produce files like (for paired-end data):
+This will produce files like:
 
-- raw/SRR26030905_1.fastq.gz (R1, forward)
-
-- raw/SRR26030905_2.fastq.gz (R2, reverse)
+- raw/SRR26030905/SRR26030905.sra
+- raw/SRR26030906/SRR26030906.sra
+- raw/SRR26030907/SRR26030907.sra
+- raw/SRR26030908/SRR26030908.sra
+- raw/SRR26030909/SRR26030909.sra
+- raw/SRR26030910/SRR26030910.sra
 
 ## 2) Download FASTQsDifferential Expression Design
 **Since you have 3 groups**: control (PBS); HHT10; HHT15
