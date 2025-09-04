@@ -65,6 +65,13 @@ This will produce files like:
 - raw/SRR26030908/SRR26030908.sra
 - raw/SRR26030909/SRR26030909.sra
 - raw/SRR26030910/SRR26030910.sra
+~~~
+
+
+
+
+
+
 
 ## 2) Download FASTQsDifferential Expression Design
 **Since you have 3 groups**: control (PBS); HHT10; HHT15
