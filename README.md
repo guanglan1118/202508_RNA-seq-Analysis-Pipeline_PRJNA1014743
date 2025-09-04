@@ -17,6 +17,8 @@ project_PRJNA1014743/
 └─ results/          # DE tables, plots, GSEA
 ~~~
 ## 0) Get the SRR runs & metadata (SRA → FASTQ)
+<https://www.ncbi.nlm.nih.gov/sra/?term=PRJNA1014743>
+
 On the PRJNA1014743 page, click “Send to” → “Run Selector” → “Run Selector” → "Download Metadata/Accession List". 
 Save as **metadata.csv**
 Edit a minimal metadata.csv with columns:
