@@ -44,6 +44,8 @@ fasterq-dump --version  #fasterq-dump : 3.2.1
 
 ~~~
 **Downloads the sequencing run from NCBI SRA** 
+
+*download single sra files* 
 ~~~
 bash
 pwd # project_PRJNA1014743
