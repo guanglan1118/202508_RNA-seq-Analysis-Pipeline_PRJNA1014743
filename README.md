@@ -134,7 +134,11 @@ This will produce files like:
 - qc/fastqc/SRR26030905_2.fastqc.zip
 ...
 - qc/multiqc/multiqc_report.html # check this report
-
+- ~25M reads per sample
+- ~50% GC content (normal for human)
+- Low adapter contamination
+- <1% overrepresented sequences
+- Quality scores are consistently high
 
 ## 3) Quantification (Salmon)
 ### 3.1) Download GENCODE v44 transcript FASTA
