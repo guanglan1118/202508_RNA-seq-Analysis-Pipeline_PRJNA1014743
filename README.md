@@ -114,7 +114,7 @@ conda install -c bioconda fastqc
 fasterq-dump --version  #FastQC v0.12.1
 
 conda install -c bioconda multiqc
-multiqc --version  #FastQC v0.12.1
+multiqc --version  #multiqc, version 1.30     
 ~~~
 
 ### 2.2) run QC
