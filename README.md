@@ -144,7 +144,6 @@ This will produce files like:
 5. Quality scores are consistently high
 
 
-
 ## 3) Quantification 
 ### 3.1) Build a decoy-aware index
 ~~~
