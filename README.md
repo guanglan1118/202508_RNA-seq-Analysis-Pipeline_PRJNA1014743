@@ -141,6 +141,24 @@ This will produce files like:
 4. <1% overrepresented sequences
 5. Quality scores are consistently high
 
+
+
+## 3) Quantification (Salmon)
+### 3.1) Build a decoy-aware index
+~~~
+# refs/
+mkdir -p refs && cd refs
+
+# Download (use HTTPS instead of FTP to avoid firewall issues)
+wget https://ftp.ebi.ac.uk/pub/databases/gencode/Gencode_human/release_44/gencode.v44.transcripts.fa.gz
+wget https://ftp.ebi.ac.uk/pub/databases/gencode/Gencode_human/release_44/GRCh38.primary_assembly.genome.fa.gz
+wget https://ftp.ebi.ac.uk/pub/databases/gencode/Gencode_human/release_44/gencode.v44.annotation.gtf.gz
+
+
+~~~
+
+
+
 ## 3) Quantification (Salmon)
 ### 3.1) Download GENCODE v44 transcript FASTA
 ~~~
