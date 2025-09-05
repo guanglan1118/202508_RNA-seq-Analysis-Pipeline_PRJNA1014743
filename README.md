@@ -112,6 +112,9 @@ This will produce files like:
 # bash
 conda install -c bioconda fastqc
 fasterq-dump --version  #FastQC v0.12.1
+
+conda install -c bioconda multiqc
+multiqc --version  #FastQC v0.12.1
 ~~~
 
 ### 2.2) run QC
@@ -130,8 +133,6 @@ This will produce files like:
 - qc/fastqc/SRR26030905_2.fastqc.html
 - qc/fastqc/SRR26030905_2.fastqc.zip
 ...
-
-
 
 
 
