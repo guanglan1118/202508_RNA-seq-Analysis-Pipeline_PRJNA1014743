@@ -124,6 +124,14 @@ fastqc -t 6 -o qc/fastqc raw_fastq/*.fastq
 # Summarize reports
 multiqc -o qc/multiqc qc/fastqc
 ~~~
+This will produce files like:
+- qc/fastqc/SRR26030905_1.fastqc.html
+- qc/fastqc/SRR26030905_1.fastqc.zip
+- qc/fastqc/SRR26030905_2.fastqc.html
+- qc/fastqc/SRR26030905_2.fastqc.zip
+...
+
+
 
 
 
