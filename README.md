@@ -29,6 +29,7 @@ Edit a minimal metadata.csv with columns:
 ### 1.1) intsall fasterq-dump 
 
 *fasterq-dump is a tool from SRA-tools (the NCBI Sequence Read Archive toolkit)*
+
 *fasterq-dump does not support --gzip* 
 
 ~~~
@@ -40,9 +41,9 @@ conda activate sra
 # Verify installation
 which fasterq-dump
 fasterq-dump --version  #fasterq-dump : 3.2.1
-
 ~~~
-### 1.2) intsall fasterq-dump Downloads the sequencing run from NCBI SRA
+
+### 1.2) Downloads the sequencing run from NCBI SRA
 
 *download single .sra files* 
 ~~~
@@ -75,7 +76,7 @@ This will produce files like:
 - raw/SRR26030909/SRR26030909.sra
 - raw/SRR26030910/SRR26030910.sra
 
-**Converts .sra archive files into plain FASTQ files** 
+### 1.3) Converts .sra archive files into plain FASTQ files** 
 ~~~
 mkdir -p raw_fastq
 fasterq-dump raw/SRR26030905/SRR26030905.sra -e 8 -p --split-files -t tmp -O raw_fastq/
