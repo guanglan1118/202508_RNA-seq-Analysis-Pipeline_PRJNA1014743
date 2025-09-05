@@ -90,6 +90,21 @@ for sra in raw/*/*.sra; do
   fasterq-dump "$sra" -e 8 -p --split-files -t tmp -O raw_fastq/
 done
 ~~~
+This will produce files like:
+- raw_fastq/SRR26030905_1.fastq
+- raw_fastq/SRR26030905_2.fastq
+- raw_fastq/SRR26030906_1.fastq
+- raw_fastq/SRR26030906_2.fastq
+- raw_fastq/SRR26030907_1.fastq
+- raw_fastq/SRR26030907_2.fastq
+- raw_fastq/SRR26030908_1.fastq
+- raw_fastq/SRR26030908_2.fastq
+- raw_fastq/SRR26030909_1.fastq
+- raw_fastq/SRR26030909_2.fastq
+- raw_fastq/SRR26030910_1.fastq
+- raw_fastq/SRR26030910_2.fastq
+~~~
+
 
 
 
