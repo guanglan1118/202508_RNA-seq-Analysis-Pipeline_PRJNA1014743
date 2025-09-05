@@ -103,7 +103,21 @@ This will produce files like:
 - raw_fastq/SRR26030909_2.fastq
 - raw_fastq/SRR26030910_1.fastq
 - raw_fastq/SRR26030910_2.fastq
+
+## 2) Raw data QC
+
+**intsall fastqc** 
 ~~~
+# bash
+conda install -c bioconda fastqc
+
+# Verify installation
+which fasterq-dump
+fasterq-dump --version  #fasterq-dump : 3.2.1
+
+
+
+
 
 
 
