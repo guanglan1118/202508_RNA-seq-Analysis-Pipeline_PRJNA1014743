@@ -26,10 +26,9 @@ Edit a minimal metadata.csv with columns:
 ![metadata.csv](figures/metadata.png)
 
 ## 1) Download FASTQs
-**intsall fasterq-dump** 
+### 1.1) intsall fasterq-dump 
 
 *fasterq-dump is a tool from SRA-tools (the NCBI Sequence Read Archive toolkit)*
-
 *fasterq-dump does not support --gzip* 
 
 ~~~
@@ -43,7 +42,7 @@ which fasterq-dump
 fasterq-dump --version  #fasterq-dump : 3.2.1
 
 ~~~
-**Downloads the sequencing run from NCBI SRA** 
+### 1.2) intsall fasterq-dump Downloads the sequencing run from NCBI SRA
 
 *download single .sra files* 
 ~~~
