@@ -45,7 +45,7 @@ fasterq-dump --version  #fasterq-dump : 3.2.1
 ~~~
 **Downloads the sequencing run from NCBI SRA** 
 
-*download single sra files* 
+*download single .sra files* 
 ~~~
 bash
 pwd # project_PRJNA1014743
@@ -59,7 +59,7 @@ prefetch --max-size 200G -O raw_test SRR26030910
 ls -lh raw_test/SRR26030905/ #check the file size 
 ~~~
 
-*copy-pasteable ways to bulk download raw .sra files* 
+*copy-pasteable ways to bulk download .sra files* 
 ~~~
 cut -d, -f2 meta/metadata.csv | tail -n +2 | tr -d '\r' | while read -r SRR; do
   [ -z "$SRR" ] && continue
