@@ -76,12 +76,14 @@ This will produce files like:
 - raw/SRR26030909/SRR26030909.sra
 - raw/SRR26030910/SRR26030910.sra
 
-### 1.3) Converts .sra archive files into plain FASTQ files** 
+### 1.3) Converts .sra archive files into plain FASTQ files
+*convert single file* 
 ~~~
 mkdir -p raw_fastq
 fasterq-dump raw/SRR26030905/SRR26030905.sra -e 8 -p --split-files -t tmp -O raw_fastq/
 ~~~
 
+*convert batch file* 
 ~~~
 pwd #project_PRJNA1014743
 for sra in raw/*/*.sra; do
