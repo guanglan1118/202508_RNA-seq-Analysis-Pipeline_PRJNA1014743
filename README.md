@@ -23,7 +23,7 @@ On the PRJNA1014743 page, click “Send to” → “Run Selector” → “Run 
 Save as **metadata.csv**
 Edit a minimal metadata.csv with columns:
 
-![multiqc](figures/multiqc.png)
+![metadata](figures/metadata.png)
 
 ## 1) Download FASTQs
 ### 1.1) intsall fasterq-dump 
@@ -134,7 +134,7 @@ This will produce files like:
 - qc/fastqc/SRR26030905_2.fastqc.zip
 ...
 
-![multidatata.csv](figures/metadata.png)
+![multiqc.csv](figures/multiqc.png)
 
 
 ## 3) Quantification (Salmon)
