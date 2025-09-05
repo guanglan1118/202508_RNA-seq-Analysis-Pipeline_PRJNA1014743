@@ -79,12 +79,14 @@ This will produce files like:
 ### 1.3) Converts .sra archive files into plain FASTQ files
 *convert single file* 
 ~~~
+#bash
 mkdir -p raw_fastq
 fasterq-dump raw/SRR26030905/SRR26030905.sra -e 8 -p --split-files -t tmp -O raw_fastq/
 ~~~
 
 *convert batch file* 
 ~~~
+#bash
 pwd #project_PRJNA1014743
 for sra in raw/*/*.sra; do
   SRR=$(basename "$sra" .sra)
@@ -146,6 +148,7 @@ This will produce files like:
 ## 3) Quantification 
 ### 3.1) Build a decoy-aware index
 ~~~
+# bash
 # refs/
 mkdir -p refs && cd refs
 
@@ -158,11 +161,13 @@ gunzip *.gz
 ~~~
 
 ~~~
+# bash
 # Create decoys list (chromosome headers from the genome FASTA)
 grep "^>" GRCh38.primary_assembly.genome.fa | cut -d " " -f1 | sed 's/>//g' > decoys.txt
 ~~~
 
 ~~~
+# bash
 # Make gentrome (transcripts + genome)
 cat gencode.v44.transcripts.fa GRCh38.primary_assembly.genome.fa > gencode.v44.gentrome.fa
 
@@ -173,6 +178,42 @@ salmon index \
   -i salmon_gencode_v44_decoy \
   --gencode
 ~~~
+
+### 3.2) Quantify with recommended flags
+Bias correction and selective alignment generally improve estimates.
+~~~
+# adjust sample names to match your files (yours looked like SRR* earlier)
+mkdir -p ../quant
+for S in CTRL1 CTRL2 CTRL3 TRT1 TRT2 TRT3
+do
+  salmon quant \
+    -i refs/salmon_gencode_v44_decoy \
+    -l A \
+    -1 raw/${S}_R1.fastq.gz \
+    -2 raw/${S}_R2.fastq.gz \
+    --validateMappings \
+    --gcBias \
+    --seqBias \
+    --numBootstraps 100 \
+    -p 8 \
+    -o quant/$S
+done
+~~~
+### 3) Prepare tx2gene for gene-level summarization
+You’ll need this for tximport → DESeq2/edgeR.
+~~~
+# From the GENCODE GTF
+awk '$3=="transcript" { 
+  tx=""; gene=""; 
+  for(i=9;i<=NF;i++){
+    if($i~/^transcript_id/) {tx=$(i+1); gsub(/"|;/, "", tx)}
+    if($i~/^gene_id/)       {gene=$(i+1); gsub(/"|;/, "", gene)}
+  }
+  if(tx!="" && gene!="") print tx"\t"gene
+}' gencode.v44.annotation.gtf > tx2gene_gencode_v44.tsv
+~~~
+
+
 
 
 
