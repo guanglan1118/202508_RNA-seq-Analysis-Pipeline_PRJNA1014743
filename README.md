@@ -133,7 +133,7 @@ This will produce files like:
 - qc/fastqc/SRR26030905_2.fastqc.html
 - qc/fastqc/SRR26030905_2.fastqc.zip
 ...
-- qc/multiqc/multiqc_report.html
+- qc/multiqc/multiqc_report.html # check this report
 
 
 ## 3) Quantification (Salmon)
