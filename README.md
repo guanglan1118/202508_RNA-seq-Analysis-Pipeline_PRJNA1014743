@@ -143,7 +143,7 @@ This will produce files like:
 
 
 
-## 3) Quantification (Salmon)
+## 3) Quantification 
 ### 3.1) Build a decoy-aware index
 ~~~
 # refs/
@@ -154,8 +154,26 @@ wget https://ftp.ebi.ac.uk/pub/databases/gencode/Gencode_human/release_44/gencod
 wget https://ftp.ebi.ac.uk/pub/databases/gencode/Gencode_human/release_44/GRCh38.primary_assembly.genome.fa.gz
 wget https://ftp.ebi.ac.uk/pub/databases/gencode/Gencode_human/release_44/gencode.v44.annotation.gtf.gz
 
+gunzip *.gz
+~~~
 
 ~~~
+# Create decoys list (chromosome headers from the genome FASTA)
+grep "^>" GRCh38.primary_assembly.genome.fa | cut -d " " -f1 | sed 's/>//g' > decoys.txt
+~~~
+# Make gentrome (transcripts + genome)
+cat gencode.v44.transcripts.fa GRCh38.primary_assembly.genome.fa > gencode.v44.gentrome.fa
+
+# Build Salmon index (decoy-aware)
+salmon index \
+  -t gencode.v44.gentrome.fa \
+  -d decoys.txt \
+  -i salmon_gencode_v44_decoy \
+  --gencode
+~~~
+
+
+
 
 
 
