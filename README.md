@@ -127,50 +127,137 @@ multiqc -o qc/multiqc qc/fastqc
 
 
 
+## 3) Quantification (Salmon)
+### 3.1) Download GENCODE v44 transcript FASTA
+~~~
+mkdir -p ref
+cd ref
+# Download transcript FASTA
+wget ftp://ftp.ebi.ac.uk/pub/databases/gencode/Gencode_human/release_44/gencode.v44.transcripts.fa.gz
+# Unzip
+gunzip gencode.v44.transcripts.fa.gz
+~~~
+
+
+
 
 
 
 
 ~~~
-find raw -type f -name "*.sra" -print0 | xargs -0 -P 6 -I{} bash -lc '
-  set -e
-  f="{}"; base=$(basename "$f" .sra)
-  echo "[RUN] $base -> fastq_out/"
+# Build index (once)
+salmon index -t gencode.v44.transcripts.fa -i ref/salmon_gencode_v44
 
-  /research/groups/yanggrp/home/glin/miniconda3/envs/sra/bin/fasterq-dump \
-    --split-3 --skip-technical --threads 8 -O fastq_out "$f"
-
-  # compress outputs (works for single-end or paired)
-  shopt -s nullglob
-  if command -v pigz >/dev/null; then
-    pigz -p 8 fastq_out/${base}*.fastq
-  else
-    gzip -f fastq_out/${base}*.fastq
-  fi
-'
+# Quantify each sample
+for S in CTRL1 CTRL2 CTRL3 TRT1 TRT2 TRT3
+do
+  salmon quant -i ref/salmon_gencode_v44 -l A \
+    -1 raw/${S}_R1.fastq.gz -2 raw/${S}_R2.fastq.gz \
+    -p 8 -o quant/$S
+done
 ~~~
-This will produce files like:
 
-- fastq_out/SRR26030905_1.fastq
-- fastq_out/SRR26030905_2.fastq
-- fastq_out/SRR26030906_1.fastq
-- fastq_out/SRR26030906_2.fastq
-- fastq_out/SRR26030907_1.fastq
-- fastq_out/SRR26030907_2.fastq
-- fastq_out/SRR26030908_1.fastq
-- fastq_out/SRR26030908_2.fastq
-- fastq_out/SRR26030909_1.fastq
-- fastq_out/SRR26030909_2.fastq
-- fastq_out/SRR26030910_1.fastq
-- fastq_out/SRR26030910_2.fastq
+## 4) Import counts into R
 
-## 2) Download FASTQsDifferential Expression Design
-**Since you have 3 groups**: control (PBS); HHT10; HHT15
-Your DESeq2 design should be:
 ~~~
-# r 
-dds <- DESeqDataSetFromTximport(txi, colData=coldata, design=~ condition)
+library(tximport)
+library(DESeq2)
+library(readr)
+
+# Metadata
+coldata <- read.csv("metadata.csv", row.names=1)
+
+# Files
+files <- file.path("quant", rownames(coldata), "quant.sf")
+names(files) <- rownames(coldata)
+
+# Transcript → gene mapping
+tx2gene <- read.csv("tx2gene_gencode_v44.csv")  # transcript_id,gene_id
+
+# Import
+txi <- tximport(files, type="salmon", tx2gene=tx2gene)
+
+dds <- DESeqDataSetFromTximport(txi, colData=coldata, design=~ batch + condition)
+
+# Prefilter
+keep <- rowSums(counts(dds) >= 10) >= 2
+dds <- dds[keep,]
 ~~~
+
+## 5) QC & Visualization
+~~~
+vsd <- vst(dds)
+
+plotPCA(vsd, intgroup=c("condition","batch"))
+
+library(pheatmap)
+dists <- dist(t(assay(vsd)))
+pheatmap(as.matrix(dists))
+~~~
+
+## 6) Differential Expression
+
+~~~
+dds <- DESeq(dds)
+
+res <- results(dds, contrast=c("condition","treated","control"))
+res <- lfcShrink(dds, contrast=c("condition","treated","control"), type="apeglm")
+
+summary(res)
+
+res_sig <- subset(as.data.frame(res), padj < 0.05 & abs(log2FoldChange) > 1)
+write.csv(res_sig, "DE_genes.csv", row.names=TRUE)
+~~~
+
+
+## 7) Visualization (Volcano & Heatmap)
+~~~
+library(ggplot2)
+
+res_df <- as.data.frame(res)
+ggplot(res_df, aes(x=log2FoldChange, y=-log10(padj))) +
+  geom_point(alpha=0.5) +
+  geom_vline(xintercept=c(-1,1), linetype="dashed", color="red") +
+  geom_hline(yintercept=-log10(0.05), linetype="dashed", color="blue")
+
+topgenes <- head(order(res$padj), 30)
+pheatmap(assay(vsd)[topgenes,], cluster_rows=TRUE, cluster_cols=TRUE,
+         annotation_col=coldata)
+
+~~~
+
+
+## 8) Pathway Enrichment (GSEA)
+~~~
+library(fgsea)
+library(msigdbr)
+
+msig <- msigdbr(species="Homo sapiens", category="H") |>
+        split(~gene_symbol)
+
+ranks <- res_df$log2FoldChange
+names(ranks) <- rownames(res_df)
+
+fg <- fgsea(msig, stats=ranks, minSize=15, maxSize=500, nperm=10000)
+write.csv(fg[order(fg$padj),], "GSEA_results.csv")
+~~~
+
+## 9) Deliverables
+
+At the end you would have:
+
+- QC reports (FastQC, MultiQC, PCA, heatmaps).
+
+- Counts matrix and DESeq2 objects (dds.rds, vsd.rds).
+
+- DE gene table (DE_genes.csv).
+
+- Figures (Volcano, Heatmap).
+
+- Pathway results (GSEA_results.csv).
+
+
+
 
 
 
