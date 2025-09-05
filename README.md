@@ -40,9 +40,27 @@ conda activate sra
 
 # Verify installation
 which fasterq-dump
-fasterq-dump --version  #fasterq-dump : 3.2.1  
+fasterq-dump --version  #fasterq-dump : 3.2.1
+
 ~~~
 **Downloads the sequencing run from NCBI SRA** 
+~~~
+bash
+pwd # project_PRJNA1014743
+prefetch --max-size 200G -O raw_test SRR26030905 
+prefetch --max-size 200G -O raw_test SRR26030906 
+prefetch --max-size 200G -O raw_test SRR26030907
+prefetch --max-size 200G -O raw_test SRR26030908 
+prefetch --max-size 200G -O raw_test SRR26030909
+prefetch --max-size 200G -O raw_test SRR26030910
+
+ls -lh raw_test/SRR26030905/
+~~~
+
+
+
+
+
 ~~~
 # bash
 pwd # project_PRJNA1014743
