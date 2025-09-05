@@ -133,8 +133,7 @@ This will produce files like:
 - qc/fastqc/SRR26030905_2.fastqc.html
 - qc/fastqc/SRR26030905_2.fastqc.zip
 ...
-
-![multiqc.csv](figures/multiqc.png)
+- qc/multiqc/multiqc_report.html
 
 
 ## 3) Quantification (Salmon)
