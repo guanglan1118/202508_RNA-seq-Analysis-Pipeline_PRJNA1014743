@@ -76,7 +76,7 @@ This will produce files like:
 - raw/SRR26030909/SRR26030909.sra
 - raw/SRR26030910/SRR26030910.sra
 
-**converts .sra archive files into plain FASTQ files** 
+**Converts .sra archive files into plain FASTQ files** 
 ~~~
 mkdir -p raw_fastq
 fasterq-dump raw/SRR26030905/SRR26030905.sra -e 8 -p --split-files -t tmp -O raw_fastq/
