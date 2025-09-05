@@ -105,16 +105,23 @@ This will produce files like:
 - raw_fastq/SRR26030910_2.fastq
 
 ## 2) Raw data QC
-
-**intsall fastqc** 
+### 2.1) intsall fastqc
 ~~~
 # bash
 conda install -c bioconda fastqc
+fasterq-dump --version  #FastQC v0.12.1
+~~~
 
-# Verify installation
-which fasterq-dump
-fasterq-dump --version  #fasterq-dump : 3.2.1
+### 2.2) run QC
+~~~
+# bash
+mkdir -p qc/fastqc qc/multiqc
+# Run FastQC (6 threads)
+fastqc -t 6 -o qc/fastqc raw_fastq/*.fastq
 
+# Summarize reports
+multiqc -o qc/multiqc qc/fastqc
+~~~
 
 
 
