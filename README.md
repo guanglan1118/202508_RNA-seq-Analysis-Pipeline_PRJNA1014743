@@ -161,6 +161,8 @@ gunzip *.gz
 # Create decoys list (chromosome headers from the genome FASTA)
 grep "^>" GRCh38.primary_assembly.genome.fa | cut -d " " -f1 | sed 's/>//g' > decoys.txt
 ~~~
+
+~~~
 # Make gentrome (transcripts + genome)
 cat gencode.v44.transcripts.fa GRCh38.primary_assembly.genome.fa > gencode.v44.gentrome.fa
 
