@@ -54,14 +54,20 @@ prefetch --max-size 200G -O raw_test SRR26030908
 prefetch --max-size 200G -O raw_test SRR26030909
 prefetch --max-size 200G -O raw_test SRR26030910
 
-ls -lh raw_test/SRR26030905/
+ls -lh raw_test/SRR26030905/ #check the file size 
+~~~
+
+*copy-pasteable ways to bulk download raw .sra files* 
+~~~
+cut -d, -f2 meta/metadata.csv | tail -n +2 | tr -d '\r' | while read -r SRR; do
+  [ -z "$SRR" ] && continue
+  echo "==> prefetch $SRR"
+  prefetch --max-size 200G -O raw "$SRR"
+done
 ~~~
 
 
 
-
-
-~~~
 # bash
 pwd # project_PRJNA1014743
 
