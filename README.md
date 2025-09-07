@@ -148,8 +148,8 @@ This will produce files like:
 ### 3.1) Build a decoy-aware index
 ~~~
 # bash
-# refs/
-mkdir -p refs && cd refs
+# ref/
+mkdir -p ref
 
 # Download (use HTTPS instead of FTP to avoid firewall issues)
 wget https://ftp.ebi.ac.uk/pub/databases/gencode/Gencode_human/release_44/gencode.v44.transcripts.fa.gz
@@ -158,6 +158,11 @@ wget https://ftp.ebi.ac.uk/pub/databases/gencode/Gencode_human/release_44/gencod
 
 gunzip *.gz
 ~~~
+
+This will produce files like:
+- gencode.v44.annotation.gtf  
+- gencode.v44.transcripts.fa  
+- GRCh38.primary_assembly.genome.fa
 
 ~~~
 # bash
