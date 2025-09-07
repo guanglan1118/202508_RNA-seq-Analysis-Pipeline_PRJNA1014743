@@ -197,6 +197,10 @@ salmon index \
 ~~~
 
 This will produce files like:
+[info] Building perfect hash
+[info] Index built successfully
+
+
 ~~~
 quant/
  ├── CTRL1/
