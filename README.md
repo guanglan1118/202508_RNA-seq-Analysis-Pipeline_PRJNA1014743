@@ -191,7 +191,7 @@ salmon --version  #version : 1.10.3
 salmon index \
   -t gencode.v44.gentrome.fa \
   -d decoys.txt \
-  -i salmon_gencode_v44_decoy \y
+  -i salmon_gencode_v44_decoy \
 
   --gencode
 ~~~
