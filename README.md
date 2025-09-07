@@ -176,7 +176,12 @@ This will produce files like:
 # bash
 # Make gentrome (transcripts + genome)
 cat gencode.v44.transcripts.fa GRCh38.primary_assembly.genome.fa > gencode.v44.gentrome.fa
+~~~
+This will produce files like:
+- gencode.v44.gentrome.fa 
 
+
+~~~
 # Build Salmon index (decoy-aware)
 salmon index \
   -t gencode.v44.gentrome.fa \
