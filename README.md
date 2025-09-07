@@ -180,15 +180,22 @@ cat gencode.v44.transcripts.fa GRCh38.primary_assembly.genome.fa > gencode.v44.g
 This will produce files like:
 - gencode.v44.gentrome.fa 
 
+~~~
+conda activate sra
+conda install -c bioconda salmon=1.10.3
+salmon --version  #version : 1.10.3
+~~~
 
 ~~~
 # Build Salmon index (decoy-aware)
 salmon index \
   -t gencode.v44.gentrome.fa \
   -d decoys.txt \
-  -i salmon_gencode_v44_decoy \
+  -i salmon_gencode_v44_decoy \y
+
   --gencode
 ~~~
+
 
 ### 3.2) Quantify with recommended flags
 Bias correction and selective alignment generally improve estimates.
