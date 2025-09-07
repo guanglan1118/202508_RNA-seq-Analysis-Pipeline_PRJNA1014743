@@ -197,7 +197,6 @@ salmon index \
 ~~~
 
 This will produce files like:
-
 quant/
  ├── CTRL1/
  ├── CTRL2/
@@ -207,7 +206,6 @@ quant/
  └── TRT3/
 
  
-
 ### 3.2) Quantify with recommended flags
 Bias correction and selective alignment generally improve estimates.
 ~~~
@@ -245,40 +243,6 @@ awk '$3=="transcript" {
 
 
 
-
-
-
-
-
-## 3) Quantification (Salmon)
-### 3.1) Download GENCODE v44 transcript FASTA
-~~~
-mkdir -p ref
-cd ref
-# Download transcript FASTA
-wget ftp://ftp.ebi.ac.uk/pub/databases/gencode/Gencode_human/release_44/gencode.v44.transcripts.fa.gz
-# Unzip
-gunzip gencode.v44.transcripts.fa.gz
-~~~
-
-
-
-
-
-
-
-~~~
-# Build index (once)
-salmon index -t gencode.v44.transcripts.fa -i ref/salmon_gencode_v44
-
-# Quantify each sample
-for S in CTRL1 CTRL2 CTRL3 TRT1 TRT2 TRT3
-do
-  salmon quant -i ref/salmon_gencode_v44 -l A \
-    -1 raw/${S}_R1.fastq.gz -2 raw/${S}_R2.fastq.gz \
-    -p 8 -o quant/$S
-done
-~~~
 
 ## 4) Import counts into R
 
