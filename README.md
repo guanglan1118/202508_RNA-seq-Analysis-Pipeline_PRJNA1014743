@@ -169,7 +169,9 @@ This will produce files like:
 # Create decoys list (chromosome headers from the genome FASTA)
 grep "^>" GRCh38.primary_assembly.genome.fa | cut -d " " -f1 | sed 's/>//g' > decoys.txt
 ~~~
-
+This will produce files like:
+- decoys.txt 
+ 
 ~~~
 # bash
 # Make gentrome (transcripts + genome)
