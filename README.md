@@ -189,11 +189,11 @@ salmon --version  #version : 1.10.3
 ~~~
 # Build Salmon index (decoy-aware)
 salmon index \
-  -t gencode.v44.gentrome.fa \
-  -d decoys.txt \
-  -i salmon_gencode_v44_decoy \
-  --gencode \
-  -p 8
+  -t gencode.v44.gentrome.fa \   # Input: gentrome FASTA (transcripts + genome)
+  -d decoys.txt \                # Input: decoy list (chromosome/contig names extracted from the genome FASTA)
+  -i salmon_gencode_v44_decoy \  # Output: index directory (Salmon will write the index here)
+  --gencode \                    # Optimize for GENCODE transcript IDs
+  -p 8                           # Use 8 CPU threads
 ~~~
 
 This will produce files like:
