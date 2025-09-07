@@ -192,9 +192,10 @@ salmon index \
   -t gencode.v44.gentrome.fa \
   -d decoys.txt \
   -i salmon_gencode_v44_decoy \
-
-  --gencode
+  --gencode \
+  -p 8
 ~~~
+
 This will produce files like:
 
 quant/
