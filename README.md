@@ -197,6 +197,7 @@ salmon index \
 ~~~
 
 This will produce files like:
+~~~
 quant/
  ├── CTRL1/
  ├── CTRL2/
@@ -204,7 +205,7 @@ quant/
  ├── TRT1/
  ├── TRT2/
  └── TRT3/
-
+~~~
  
 ### 3.2) Quantify with recommended flags
 Bias correction and selective alignment generally improve estimates.
