@@ -195,7 +195,14 @@ salmon index \
 
   --gencode
 ~~~
-
+This will produce files like:
+quant/
+ ├── CTRL1/
+ ├── CTRL2/
+ ├── CTRL3/
+ ├── TRT1/
+ ├── TRT2/
+ └── TRT3/
 
 ### 3.2) Quantify with recommended flags
 Bias correction and selective alignment generally improve estimates.
@@ -207,8 +214,8 @@ do
   salmon quant \
     -i refs/salmon_gencode_v44_decoy \
     -l A \
-    -1 raw/${S}_R1.fastq.gz \
-    -2 raw/${S}_R2.fastq.gz \
+    -1 raw_fastq/${S}_R1.fastq \
+    -2 raw_fastq/${S}_R2.fastq \
     --validateMappings \
     --gcBias \
     --seqBias \
@@ -217,6 +224,7 @@ do
     -o quant/$S
 done
 ~~~
+
 ### 3) Prepare tx2gene for gene-level summarization
 You’ll need this for tximport → DESeq2/edgeR.
 ~~~
