@@ -197,8 +197,38 @@ salmon index \
 ~~~
 
 This will produce files like:
-[info] Building perfect hash
-[info] Index built successfully
+- Building perfect hash
+- Index built successfully
+
+### 3.2) Build a Transcript-only index and Quantify
+#### 3.2.1) Build a Transcript-only index (fastest & smallest)
+~~~
+# In project_PRJNA1014743/ref
+# Build a small, fast index (no decoys)
+salmon index \
+  -t gencode.v44.transcripts.fa \
+  -i salmon_gencode_v44_txonly_idx \
+  -p 16    # increase if your node can handle it
+~~~
+- Pros: tiny, fast, low RAM.
+- Cons: slightly less protection against spurious mappings to unannotated genomic sequence (usually fine for bulk RNA-seq).
+
+#### 3.2.2) Quantify
+~~~
+# Paired-end example
+salmon quant \
+  -i ref/salmon_gencode_v44_txonly_idx \
+  -l A \
+  -1 raw_fastq/SRR26030905_1.fastq \
+  -2 raw_fastq/SRR26030905_2.fastq \
+  -p 16 --validateMappings \
+  -o quant/SRR26030905
+~~~
+
+
+
+
+
 
 
 ~~~
@@ -211,7 +241,7 @@ quant/
  └── TRT3/
 ~~~
  
-### 3.2) Quantify with recommended flags
+### 3.3) Quantify with recommended flags
 Bias correction and selective alignment generally improve estimates.
 ~~~
 # adjust sample names to match your files (yours looked like SRR* earlier)
