@@ -230,7 +230,7 @@ salmon quant \
 First, prepare the data:
 - Genome FASTA (e.g., GRCh38.primary_assembly.genome.fa)
 - GENCODE annotation GTF (e.g., gencode.v44.annotation.gtf)
-~~~~
+~~~
 STAR --runThreadN 32 \
      --runMode genomeGenerate \
      --genomeDir STAR_index_gencodev44 \
@@ -239,7 +239,7 @@ STAR --runThreadN 32 \
      --sjdbOverhang 100
 ~~~
 
-
+#### 3.3.2) Quantify with STAR index
 
 
 
