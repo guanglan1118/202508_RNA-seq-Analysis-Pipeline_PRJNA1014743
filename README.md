@@ -227,19 +227,21 @@ salmon quant \
 This will produce files like:
 - Index built successfully
 
+### 3.3) Build a STAR index and Quantify
+#### 3.3.1) Build a STAR index
+First, prepare the data:
+- Genome FASTA (e.g., GRCh38.primary_assembly.genome.fa)
 
-
-
-
+- GENCODE annotation GTF (e.g., gencode.v44.annotation.gtf)
+~~~~
+STAR --runThreadN 32 \
+     --runMode genomeGenerate \
+     --genomeDir STAR_index_gencodev44 \
+     --genomeFastaFiles GRCh38.primary_assembly.genome.fa \
+     --sjdbGTFfile gencode.v44.annotation.gtf \
+     --sjdbOverhang 100
 ~~~
-quant/
- ├── CTRL1/
- ├── CTRL2/
- ├── CTRL3/
- ├── TRT1/
- ├── TRT2/
- └── TRT3/
-~~~
+
  
 ### 3.3) Quantify with recommended flags
 Bias correction and selective alignment generally improve estimates.
