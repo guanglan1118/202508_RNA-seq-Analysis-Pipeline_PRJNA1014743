@@ -224,14 +224,11 @@ salmon quant \
   -p 16 --validateMappings \
   -o quant/SRR26030905
 ~~~
-This will produce files like:
-- Index built successfully
 
 ### 3.3) Build a STAR index and Quantify
 #### 3.3.1) Build a STAR index
 First, prepare the data:
 - Genome FASTA (e.g., GRCh38.primary_assembly.genome.fa)
-
 - GENCODE annotation GTF (e.g., gencode.v44.annotation.gtf)
 ~~~~
 STAR --runThreadN 32 \
@@ -241,6 +238,12 @@ STAR --runThreadN 32 \
      --sjdbGTFfile gencode.v44.annotation.gtf \
      --sjdbOverhang 100
 ~~~
+
+
+
+
+
+
 
  
 ### 3.3) Quantify with recommended flags
