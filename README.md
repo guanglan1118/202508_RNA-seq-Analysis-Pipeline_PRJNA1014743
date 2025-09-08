@@ -224,8 +224,8 @@ salmon quant \
   -p 16 --validateMappings \
   -o quant/SRR26030905
 ~~~
-
-
+This will produce files like:
+- Index built successfully
 
 
 
