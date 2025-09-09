@@ -231,8 +231,9 @@ First, prepare the data:
 - Genome FASTA (e.g., GRCh38.primary_assembly.genome.fa)
 - GENCODE annotation GTF (e.g., gencode.v44.annotation.gtf)
 
-star_genome_build.lsf
+star_genome.sh
 ~~~
+#!/bin/bash
 #BSUB -J star_genome
 #BSUB -q standard
 #BSUB -n 32
@@ -240,17 +241,23 @@ star_genome_build.lsf
 #BSUB -o star_genome.%J.out
 #BSUB -e star_genome.%J.err
 #BSUB -R "span[hosts=1]"
-#BSUB -R "rusage[mem=5600]"   # ~32 * 5.6GB ≈ 180GB
-#BSUB -M 180000               # hard cap in MB (>= requested total)
+# ~32 * 5.6GB ≈ 180GB total
+#BSUB -R "rusage[mem=5600]"
+# Hard cap in MB (>= requested total)
+#BSUB -M 180000
 
+set -euo pipefail
+
+# initialize conda in batch shells
+eval "$(conda shell.bash hook)"
 conda activate sra
 
 cd /research/groups/yanggrp/home/glin/work_2025/Sep/project_PRJNA1014743/ref
-
 rm -rf STAR_index_gencodev44 _STARtmp
 mkdir -p STAR_index_gencodev44
 
-STAR --runThreadN 32 \
+STAR \
+  --runThreadN 32 \
   --runMode genomeGenerate \
   --genomeDir STAR_index_gencodev44 \
   --genomeFastaFiles GRCh38.primary_assembly.genome.fa \
@@ -262,10 +269,21 @@ STAR --runThreadN 32 \
 star_genome_build.lsf
 ~~~
 # bash
-bsub < star_genome_build.lsf
+bsub < star_genome.sh
 # check the running process
 bjobs
 ~~~
+
+monitor 
+~~~
+bjobs -w -u $USER            # see when it’s RUN and on which node
+bpeek -f <JOBID>             # live stdout once RUN (replace with actual ID)
+tail -f star_genome.<JOBID>.out
+tail -f star_genome.<JOBID>.err
+tail -f STAR_index_gencodev44/Log.out
+~~~
+
+
 
 
 #### 3.3.2) Quantify with STAR index
