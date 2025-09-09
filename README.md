@@ -230,14 +230,51 @@ salmon quant \
 First, prepare the data:
 - Genome FASTA (e.g., GRCh38.primary_assembly.genome.fa)
 - GENCODE annotation GTF (e.g., gencode.v44.annotation.gtf)
+
+star_genome_build.lsf
 ~~~
+#BSUB -J star_genome
+#BSUB -q standard
+#BSUB -n 32
+#BSUB -W 24:00
+#BSUB -o star_genome.%J.out
+#BSUB -e star_genome.%J.err
+#BSUB -R "span[hosts=1]"
+#BSUB -R "rusage[mem=5600]"   # ~32 * 5.6GB ≈ 180GB
+#BSUB -M 180000               # hard cap in MB (>= requested total)
+
+conda activate sra
+
+cd /research/groups/yanggrp/home/glin/work_2025/Sep/project_PRJNA1014743/ref
+
+rm -rf STAR_index_gencodev44 _STARtmp
+mkdir -p STAR_index_gencodev44
+
 STAR --runThreadN 32 \
-     --runMode genomeGenerate \
-     --genomeDir STAR_index_gencodev44 \
-     --genomeFastaFiles GRCh38.primary_assembly.genome.fa \
-     --sjdbGTFfile gencode.v44.annotation.gtf \
-     --sjdbOverhang 100
+  --runMode genomeGenerate \
+  --genomeDir STAR_index_gencodev44 \
+  --genomeFastaFiles GRCh38.primary_assembly.genome.fa \
+  --sjdbGTFfile gencode.v44.annotation.gtf \
+  --sjdbOverhang 149 \
+  --limitGenomeGenerateRAM 170000000000
 ~~~
+
+star_genome_build.lsf
+~~~
+# bash
+bsub < star_genome_build.lsf
+# check the running process
+bjobs
+~~~
+
+
+
+
+
+
+
+
+
 
 #### 3.3.2) Quantify with STAR index
 
