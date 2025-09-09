@@ -268,14 +268,6 @@ bjobs
 ~~~
 
 
-
-
-
-
-
-
-
-
 #### 3.3.2) Quantify with STAR index
 
 
