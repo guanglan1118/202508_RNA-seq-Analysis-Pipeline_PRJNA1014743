@@ -420,7 +420,7 @@ mapping/SRR26030909
 mapping/SRR26030910
 ~~~
 
-#### (3.2.3) Generate a counts matrix (auto-detect strandedness)
+#### (3.3) Generate a counts matrix (auto-detect strandedness)
 **Job Script: make_counts.py**
 ~~~
 #!/usr/bin/env python3
