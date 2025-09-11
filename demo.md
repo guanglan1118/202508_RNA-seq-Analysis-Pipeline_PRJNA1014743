@@ -15,7 +15,9 @@ project_PRJNA1014743/
 ├─ r/                # R scripts
 └─ results/          # DE tables, plots, GSEA
 ~~~
-## (0) Get the SRR runs & metadata (SRA → FASTQ)
+## (0) Data Acquisition
+**Get SRR runs & metadata (SRA → FASTQ)**
+
 <https://www.ncbi.nlm.nih.gov/sra/?term=PRJNA1014743>
 
 On the PRJNA1014743 page, click “Send to” → “Run Selector” → “Run Selector” → "Download Metadata/Accession List". 
@@ -24,8 +26,7 @@ Edit a minimal metadata.csv with columns:
 
 ![metadata](figures/metadata.png)
 
-
-## (1) Conda env (SRA tools + helpers)
+**Conda environment setup (SRA tools + helpers)**
 ~~~
 # bash
 # Create a dedicated environment
@@ -38,10 +39,8 @@ fasterq-dump --version  #fasterq-dump : 3.2.1
 ~~~
 Note: fasterq-dump is faster but doesn’t gzip; we’ll compress with pigz.
 
-## (2) Fetch SRA & make FASTQ
-### (2.1) Fetch single case from NCBI SRA
-
-**Download single .sra files**
+## (1) Downloading SRA Files
+### (1.1) Fetch single case from NCBI SRA
 ~~~
 bash
 pwd # project_PRJNA1014743
@@ -55,8 +54,7 @@ prefetch --max-size 200G -O raw_test SRR26030910
 ls -lh raw_test/SRR26030905/ #check the file size 
 ~~~
 
-### (2.2) Fetch batch case from NCBI SRA
-**Download batch .sra files**
+### (1.2) Fetch batch case from NCBI SRA
 ~~~
 cut -d, -f2 meta/metadata.csv | tail -n +2 | tr -d '\r' | while read -r SRR; do
   [ -z "$SRR" ] && continue
@@ -73,7 +71,7 @@ This will produce files like:
 - raw/SRR26030909/SRR26030909.sra
 - raw/SRR26030910/SRR26030910.sra
 
-### (2.3) Converts .sra archive files into plain FASTQ files
+### (1.3) Convert .sra archive files into plain FASTQ files
 **Convert single file**
 ~~~
 #bash
@@ -105,8 +103,8 @@ This will produce files like:
 - raw_fastq/SRR26030910_1.fastq
 - raw_fastq/SRR26030910_2.fastq
 
-## (3) Raw data QC
-### (3.1) Intsall fastqc
+## (2) Raw Data Quality Control
+### (2.1) Intsall FastQC
 ~~~
 # bash
 conda activate sra
@@ -115,7 +113,7 @@ conda install -c bioconda multiqc
 multiqc --version  #multiqc, version 1.30     
 ~~~
 
-### (3.2) Run QC
+### (2.2) Run QC checks
 ~~~
 # bash
 mkdir -p qc/fastqc qc/multiqc
@@ -144,8 +142,8 @@ qc/multiqc/multiqc_report.html
 5. Quality scores are consistently high
 ~~~
 
-## (4) Qulification
-### (4.1) Build a decoy-aware index
+## (3) Read Alignment & Quantification
+### (3.1) Build a decoy-aware index
 
 ~~~
 # bash
@@ -202,13 +200,13 @@ This will produce files like:
 - Index built successfully
 
 
-### (4.2) Build a STAR index and Quantify
-#### (4.2.1) Build a STAR index
-First, prepare the data:
-- Genome FASTA (e.g., GRCh38.primary_assembly.genome.fa)
-- GENCODE annotation GTF (e.g., gencode.v44.annotation.gtf)
+### (3.2) Build STAR index
+- Construct STAR index
+- Map reads (paired-end; GeneCounts)
+- Generate a **counts matrix** (auto-detect strandedness)
 
-**Job Script:star_genome.sh**
+#### (3.2.1) Construct STAR index
+**Job Script: star_genome.sh**
 ~~~
 #!/bin/bash
 #BSUB -J star_genome
@@ -258,7 +256,7 @@ tail -f star_genome.<JOBID>.err
 tail -f STAR_index_gencodev44/Log.out
 ~~~
 
-### (4.2.2) Map reads (paired-end; GeneCounts)
+#### (3.2.2) Map reads (paired-end; GeneCounts)
 **Job Script: mapping.sh**
 ~~~
 #!/usr/bin/env bash
@@ -480,7 +478,7 @@ mapping/SRR26030909
 mapping/SRR26030910
 ~~~
 
-## (4.3) Build a counts matrix (auto-detect strandedness)
+#### (3.2.3) Generate a counts matrix (auto-detect strandedness)
 **Job Script: make_counts.py**
 ~~~
 #!/usr/bin/env python3
@@ -626,7 +624,9 @@ This will produce files like:
 - Counts: **counts_matrix.tsv**
 - QC:counts_matrix.tsv
 
-## (5) Import counts into R
+## (4) Data Processing in R
+- 4.1 Import counts into R
+- 4.2 QC & Visualization
 ~~~
 library(tximport)
 library(DESeq2)
@@ -652,7 +652,6 @@ keep <- rowSums(counts(dds) >= 10) >= 2
 dds <- dds[keep,]
 ~~~
 
-## (6) QC & Visualization
 ~~~
 vsd <- vst(dds)
 
@@ -663,8 +662,12 @@ dists <- dist(t(assay(vsd)))
 pheatmap(as.matrix(dists))
 ~~~
 
-## (7) Differential Expression
+## (5) Downstream Analysis
+- 5.1 Differential Expression Analysis
+- 5.2 Visualization (Volcano plots & Heatmaps)
+- 5.3 Pathway Enrichment (GSEA)
 
+**Differential Expression**
 ~~~
 dds <- DESeq(dds)
 
@@ -678,7 +681,7 @@ write.csv(res_sig, "DE_genes.csv", row.names=TRUE)
 ~~~
 
 
-## (8) Visualization (Volcano & Heatmap)
+**Visualization (Volcano & Heatmap)**
 ~~~
 library(ggplot2)
 
@@ -693,7 +696,7 @@ pheatmap(assay(vsd)[topgenes,], cluster_rows=TRUE, cluster_cols=TRUE,
          annotation_col=coldata)
 ~~~
 
-## (9) Pathway Enrichment (GSEA)
+**Pathway Enrichment (GSEA)**
 ~~~
 library(fgsea)
 library(msigdbr)
@@ -708,19 +711,13 @@ fg <- fgsea(msig, stats=ranks, minSize=15, maxSize=500, nperm=10000)
 write.csv(fg[order(fg$padj),], "GSEA_results.csv")
 ~~~
 
-## (10) Deliverables
+## (6) Deliverables
 
-At the end you would have:
+- Processed data
 
-- QC reports (FastQC, MultiQC, PCA, heatmaps).
+- Visualizations
 
-- Counts matrix and DESeq2 objects (dds.rds, vsd.rds).
-
-- DE gene table (DE_genes.csv).
-
-- Figures (Volcano, Heatmap).
-
-- Pathway results (GSEA_results.csv).
+- Enrichment results
 
 
 
