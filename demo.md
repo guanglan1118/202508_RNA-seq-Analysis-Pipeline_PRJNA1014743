@@ -283,12 +283,25 @@ tail -f star_genome.<JOBID>.err
 tail -f STAR_index_gencodev44/Log.out
 ~~~
 
+### (3.3) Map reads (paired-end; GeneCounts)
+**Job Script: mapping.sh**
+~~~
 
 
+~~~
 
-#### 3.3.2) Quantify with STAR index
+**Submit Job**
+~~~
+mkdir -p logs mapping
+bsub < mapping.sh
+~~~
 
+This will produce files like:
+logs/star_map_gencodev44_PE.269463854.err
+logs/star_map_gencodev44_PE.269463854.out
 
+mapping/mapping_summary.tsv
+...
 
 
 
