@@ -142,70 +142,12 @@ qc/multiqc/multiqc_report.html
 5. Quality scores are consistently high
 ~~~
 
-## (3) Read Alignment & Quantification
-### (3.1) Build a decoy-aware index
-
-~~~
-# bash
-# ref/
-mkdir -p ref
-
-# Download (use HTTPS instead of FTP to avoid firewall issues)
-wget https://ftp.ebi.ac.uk/pub/databases/gencode/Gencode_human/release_44/gencode.v44.transcripts.fa.gz
-wget https://ftp.ebi.ac.uk/pub/databases/gencode/Gencode_human/release_44/GRCh38.primary_assembly.genome.fa.gz
-wget https://ftp.ebi.ac.uk/pub/databases/gencode/Gencode_human/release_44/gencode.v44.annotation.gtf.gz
-
-gunzip *.gz
-~~~
-
-This will produce files like:
-- gencode.v44.annotation.gtf  
-- gencode.v44.transcripts.fa  
-- GRCh38.primary_assembly.genome.fa
-
-~~~
-# bash
-# Create decoys list (chromosome headers from the genome FASTA)
-grep "^>" GRCh38.primary_assembly.genome.fa | cut -d " " -f1 | sed 's/>//g' > decoys.txt
-~~~
-This will produce files like:
-- decoys.txt 
- 
-~~~
-# bash
-# Make gentrome (transcripts + genome)
-cat gencode.v44.transcripts.fa GRCh38.primary_assembly.genome.fa > gencode.v44.gentrome.fa
-~~~
-This will produce files like:
-- gencode.v44.gentrome.fa 
-
-~~~
-conda activate sra
-conda install -c bioconda salmon=1.10.3
-salmon --version  #version : 1.10.3
-~~~
-
-~~~
-# Build Salmon index (decoy-aware)
-salmon index \
-  -t gencode.v44.gentrome.fa \
-  -d decoys.txt \
-  -i salmon_gencode_v44_decoy \
-  --gencode \
-  -p 8
-~~~
-
-This will produce files like:
-- Building perfect hash
-- Index built successfully
-
-
-### (3.2) Build STAR index
+## (3) Build STAR index
 - Construct STAR index
 - Map reads (paired-end; GeneCounts)
 - Generate a **counts matrix** (auto-detect strandedness)
 
-#### (3.2.1) Construct STAR index
+### (3.1) Construct STAR index
 **Job Script: star_genome.sh**
 ~~~
 #!/bin/bash
@@ -256,7 +198,7 @@ tail -f star_genome.<JOBID>.err
 tail -f STAR_index_gencodev44/Log.out
 ~~~
 
-#### (3.2.2) Map reads (paired-end; GeneCounts)
+### (3.2) Map reads (paired-end; GeneCounts)
 **Job Script: mapping.sh**
 ~~~
 #!/usr/bin/env bash
