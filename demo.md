@@ -303,9 +303,9 @@ logs/star_map_gencodev44_PE.269463854.out
 ~~~
 mapping/SRR26030905├─ SRR26030905__STARgenome → temporary directories        
                    ├─ SRR26030905__STARpass1 → temporary directories
-                   ├─ SRR26030905_Aligned.sortedByCoord.out.bam → the final alignment result.
-                   ├─ SRR26030905_Log.final.out → the QC report of the alignment.
-                   ├─ SRR26030905_ReadsPerGene.out.tab → the raw gene-level count results.
+                   ├─ SRR26030905_Aligned.sortedByCoord.out.bam → the final alignment result
+                   ├─ SRR26030905_Log.final.out → the QC report of the alignment
+                   ├─ SRR26030905_ReadsPerGene.out.tab → the raw gene-level count results
 
 mapping/SRR26030906
 mapping/SRR26030907
