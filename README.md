@@ -403,10 +403,8 @@ bsub < mapping.sh
 ~~~
 
 This will produce files like:
-
-logs/star_map_gencodev44_PE.269463854.err
-
-logs/star_map_gencodev44_PE.269463854.out
+- logs/star_map_gencodev44_PE.269463854.err
+- logs/star_map_gencodev44_PE.269463854.out
 
 ~~~
 mapping/SRR26030905├─ SRR26030905__STARgenome → temporary directories        
