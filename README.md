@@ -403,7 +403,9 @@ bsub < mapping.sh
 ~~~
 
 This will produce files like:
+
 logs/star_map_gencodev44_PE.269463854.err
+
 logs/star_map_gencodev44_PE.269463854.out
 
 ~~~
