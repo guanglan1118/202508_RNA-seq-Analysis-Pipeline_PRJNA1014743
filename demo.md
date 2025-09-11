@@ -286,6 +286,197 @@ tail -f STAR_index_gencodev44/Log.out
 ### (3.3) Map reads (paired-end; GeneCounts)
 **Job Script: mapping.sh**
 ~~~
+#!/usr/bin/env bash
+#BSUB -J star_map_gencodev44_PE
+#BSUB -o logs/star_map_gencodev44_PE.%J.out
+#BSUB -e logs/star_map_gencodev44_PE.%J.err
+#BSUB -n 16
+#BSUB -R "span[hosts=1]"
+#BSUB -R "rusage[mem=4000]"     # ~4 GB/core -> ~64 GB total
+#BSUB -M 64000                  # hard memory limit (MB)
+#BSUB -W 24:00                  # walltime hh:mm
+# (no -q line; uses default queue)
+
+set -euo pipefail
+
+# =========================
+# Project-specific settings
+# =========================
+PROJECT="/research/groups/yanggrp/home/glin/work_2025/Sep/project_PRJNA1014743"
+FASTQ_DIR="${PROJECT}/raw_fastq"   # paired-end FASTQs live here
+GENOME_DIR="${PROJECT}/ref/STAR_index_gencodev44"
+GTF="/research/groups/yanggrp/home/glin/work_2025/Sep/project_PRJNA1014743/ref/gencode.v44.annotation.gtf"
+OUTROOT="${PROJECT}/mapping"       # all results go here
+THREADS=${LSB_DJOB_NUMPROC:-16}    # LSF core count (default 16)
+
+# Optional: tidy small intermediates after each sample
+CLEAN_INTERMEDIATES=true
+
+# =========================
+# Pre-flight checks
+# =========================
+mkdir -p "${OUTROOT}" logs
+
+if ! command -v STAR >/dev/null 2>&1; then
+  echo "ERROR: STAR not found in PATH." >&2
+  exit 1
+fi
+
+if [[ ! -s "${GENOME_DIR}/Genome" ]]; then
+  echo "ERROR: STAR index appears incomplete at ${GENOME_DIR} (missing Genome file)." >&2
+  exit 1
+fi
+
+if [[ ! -s "${GTF}" ]]; then
+  echo "ERROR: GTF not found at ${GTF}" >&2
+  exit 1
+fi
+
+shopt -s nullglob
+
+# Collect R1 files using common patterns (gz + plain; .fastq + .fq)
+R1S=( \
+  "${FASTQ_DIR}"/*_R1_001.fastq.gz "${FASTQ_DIR}"/*_R1.fastq.gz "${FASTQ_DIR}"/*_1.fastq.gz \
+  "${FASTQ_DIR}"/*_R1_001.fq.gz   "${FASTQ_DIR}"/*_R1.fq.gz   "${FASTQ_DIR}"/*_1.fq.gz \
+  "${FASTQ_DIR}"/*_R1_001.fastq   "${FASTQ_DIR}"/*_R1.fastq   "${FASTQ_DIR}"/*_1.fastq \
+  "${FASTQ_DIR}"/*_R1_001.fq      "${FASTQ_DIR}"/*_R1.fq      "${FASTQ_DIR}"/*_1.fq \
+)
+
+# Filter out non-matches
+TMP=()
+for f in "${R1S[@]}"; do [[ -e "$f" ]] && TMP+=("$f"); done
+R1S=("${TMP[@]}")
+
+if (( ${#R1S[@]} == 0 )); then
+  echo "No R1 FASTQ files found in ${FASTQ_DIR}" >&2
+  exit 1
+fi
+
+echo "Found ${#R1S[@]} R1 FASTQs in ${FASTQ_DIR}"
+echo "Output directory: ${OUTROOT}"
+echo "Using index: ${GENOME_DIR}"
+echo "Using GTF: ${GTF}"
+echo "Threads: ${THREADS}"
+
+# Helper: guess R2 from R1 (supports gz/plain, fastq/fq)
+guess_r2() {
+  local r1="$1" r2=""
+  if   [[ "$r1" =~ _R1_001\.fastq\.gz$ ]]; then r2="${r1/_R1_001.fastq.gz/_R2_001.fastq.gz}"
+  elif [[ "$r1" =~ _R1\.fastq\.gz$     ]]; then r2="${r1/_R1.fastq.gz/_R2.fastq.gz}"
+  elif [[ "$r1" =~ _1\.fastq\.gz$      ]]; then r2="${r1/_1.fastq.gz/_2.fastq.gz}"
+  elif [[ "$r1" =~ _R1_001\.fq\.gz$    ]]; then r2="${r1/_R1_001.fq.gz/_R2_001.fq.gz}"
+  elif [[ "$r1" =~ _R1\.fq\.gz$        ]]; then r2="${r1/_R1.fq.gz/_R2.fq.gz}"
+  elif [[ "$r1" =~ _1\.fq\.gz$         ]]; then r2="${r1/_1.fq.gz/_2.fq.gz}"
+
+  elif [[ "$r1" =~ _R1_001\.fastq$     ]]; then r2="${r1/_R1_001.fastq/_R2_001.fastq}"
+  elif [[ "$r1" =~ _R1\.fastq$         ]]; then r2="${r1/_R1.fastq/_R2.fastq}"
+  elif [[ "$r1" =~ _1\.fastq$          ]]; then r2="${r1/_1.fastq/_2.fastq}"
+  elif [[ "$r1" =~ _R1_001\.fq$        ]]; then r2="${r1/_R1_001.fq/_R2_001.fq}"
+  elif [[ "$r1" =~ _R1\.fq$            ]]; then r2="${r1/_R1.fq/_R2.fq}"
+  elif [[ "$r1" =~ _1\.fq$             ]]; then r2="${r1/_1.fq/_2.fq}"
+  fi
+  printf "%s" "$r2"
+}
+
+# Helper: decide STAR readFilesCommand based on extensions
+read_cmd_args_for_pair() {
+  local r1="$1" r2="$2"
+  if [[ "$r1" == *.gz && "$r2" == *.gz ]]; then
+    # Compressed: use zcat (STAR will read from stdin)
+    printf "%s" "--readFilesCommand zcat"
+  else
+    # Plain text: no flag needed
+    printf "%s" ""
+  fi
+}
+
+# Helper: clean sample name (strip common R1 suffixes incl. gz/plain)
+clean_sample_name() {
+  local base="$1"
+  local s="$base"
+  s="${s%_R1_001.fastq.gz}"; s="${s%_R1.fastq.gz}"; s="${s%_1.fastq.gz}"
+  s="${s%_R1_001.fq.gz}";    s="${s%_R1.fq.gz}";    s="${s%_1.fq.gz}"
+  s="${s%_R1_001.fastq}";    s="${s%_R1.fastq}";    s="${s%_1.fastq}"
+  s="${s%_R1_001.fq}";       s="${s%_R1.fq}";       s="${s%_1.fq}"
+  printf "%s" "$s"
+}
+
+# =========================
+# Alignment loop (paired-end)
+# =========================
+for fq1 in "${R1S[@]}"; do
+  fq2=$(guess_r2 "$fq1")
+  if [[ -z "${fq2}" || ! -e "${fq2}" ]]; then
+    echo "WARNING: Could not find R2 for ${fq1}; skipping." >&2
+    continue
+  fi
+
+  base=$(basename "${fq1}")
+  sample="$(clean_sample_name "${base}")"
+
+  outdir="${OUTROOT}/${sample}"
+  mkdir -p "${outdir}"
+
+  echo "[$(date)] Mapping ${sample}"
+  echo "R1: ${fq1}"
+  echo "R2: ${fq2}"
+
+  READCMD="$(read_cmd_args_for_pair "${fq1}" "${fq2}")"
+
+  # Build STAR command (conditionally add --readFilesCommand)
+  STAR \
+    --runThreadN "${THREADS}" \
+    --genomeDir "${GENOME_DIR}" \
+    --readFilesIn "${fq1}" "${fq2}" \
+    ${READCMD:+$READCMD} \
+    --sjdbGTFfile "${GTF}" \
+    --twopassMode Basic \
+    --outSAMtype BAM SortedByCoordinate \
+    --outFileNamePrefix "${outdir}/${sample}_" \
+    --quantMode GeneCounts \
+    --outSAMattrRGline ID:"${sample}" SM:"${sample}" PL:ILLUMINA \
+    --limitBAMsortRAM 55000000000
+
+  # Index BAM if samtools is available
+  if command -v samtools >/dev/null 2>&1; then
+    samtools index -@ "${THREADS}" "${outdir}/${sample}_Aligned.sortedByCoord.out.bam"
+  fi
+
+  # Optional cleanup: keep BAM + BAI + counts + final log
+  if [[ "${CLEAN_INTERMEDIATES}" == "true" ]]; then
+    rm -f "${outdir}/${sample}_Aligned.out.bam" 2>/dev/null || true
+    rm -f "${outdir}/${sample}_SJ.out.tab" 2>/dev/null || true
+    rm -f "${outdir}/${sample}_Log.out" 2>/dev/null || true
+    rm -f "${outdir}/${sample}_Log.progress.out" 2>/dev/null || true
+    rm -f "${outdir}/${sample}_Chimeric.out.junction" 2>/dev/null || true
+  fi
+done
+
+# =========================
+# Summarize mapping metrics
+# =========================
+summary="${OUTROOT}/mapping_summary.tsv"
+echo -e "sample\tUniquely_mapped%\tReads_in_genes_Unstranded\tReads_in_genes_FirstStrand\tReads_in_genes_SecondStrand" > "${summary}"
+
+for log in "${OUTROOT}"/*/*_Log.final.out; do
+  s=$(basename "${log}" _Log.final.out)
+  uniq_pct=$(awk -F '|' '/Uniquely mapped reads %/ {gsub(/%/,"",$2); gsub(/^[ \t]+|[ \t]+$/,"",$2); print $2}' "${log}")
+  rpg_dir="$(dirname "${log}")"
+  rpg="${rpg_dir}/${s}_ReadsPerGene.out.tab"
+  if [[ -f "${rpg}" ]]; then
+    unstr=$(awk 'BEGIN{sum=0} !/^N_/ {sum+=$2} END{print sum}' "${rpg}")
+    firsts=$(awk 'BEGIN{sum=0} !/^N_/ {sum+=$3} END{print sum}' "${rpg}")
+    seconds=$(awk 'BEGIN{sum=0} !/^N_/ {sum+=$4} END{print sum}' "${rpg}")
+  else
+    unstr=NA; firsts=NA; seconds=NA
+  fi
+  sample="${s%_*}"
+  echo -e "${sample}\t${uniq_pct}\t${unstr}\t${firsts}\t${seconds}" >> "${summary}"
+done
+
+echo "[$(date)] Done."
+echo "Results per sample are in: ${OUTROOT}/<sample>/"
+echo "Project summary written to: ${summary}"
 
 
 ~~~
@@ -315,7 +506,7 @@ mapping/SRR26030910
 ~~~
 
 ## (3.4) Build a counts matrix (auto-detect strandedness)
-**Job Script: mapping.py**
+**Job Script: make_counts.py**
 ~~~
 
 
@@ -323,7 +514,19 @@ mapping/SRR26030910
 
 
 
+**submit job**
 
+
+~~~
+#bash 
+conda install -n sra pandas -y
+python3 -c "import pandas as pd; print(pd.__version__)" #2.3.2
+
+python3 make_counts.py
+~~~
+This will produce files like:
+- Counts: **raw_counts.csv**
+- QC:     qc.csv
 
 
 
