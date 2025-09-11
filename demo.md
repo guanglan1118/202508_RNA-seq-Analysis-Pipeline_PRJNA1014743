@@ -528,14 +528,6 @@ This will produce files like:
 - Counts: **counts_matrix.tsv**
 - QC:counts_matrix.tsv
 
-
-
-
-
-
-
-
- 
 ### 3.3) Quantify with recommended flags
 Bias correction and selective alignment generally improve estimates.
 ~~~
