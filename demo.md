@@ -6,17 +6,16 @@
 
 ## Folder layout
 ~~~
-# bash
 project_PRJNA1014743/
-├─ raw/              # FASTQs
-├─ ref/              # reference (Salmon index, GTF/FA)
-├─ qc/               # FastQC & MultiQC
-├─ quant/            # Salmon outputs per sample
-├─ meta/             # metadata.csv, tx2gene.csv
+├─ meta/             # metadata.csv
+├─ raw/              # SRA
+├─ raw_fastq         # FASTQs
+├─ ref/              # STAR_index_gencodev44
+├─ qc/               # multiqc_report.html
 ├─ r/                # R scripts
 └─ results/          # DE tables, plots, GSEA
 ~~~
-## 0) Get the SRR runs & metadata (SRA → FASTQ)
+## (0) Get the SRR runs & metadata (SRA → FASTQ)
 <https://www.ncbi.nlm.nih.gov/sra/?term=PRJNA1014743>
 
 On the PRJNA1014743 page, click “Send to” → “Run Selector” → “Run Selector” → "Download Metadata/Accession List". 
@@ -25,13 +24,8 @@ Edit a minimal metadata.csv with columns:
 
 ![metadata](figures/metadata.png)
 
-## 1) Download FASTQs
-### 1.1) intsall fasterq-dump 
 
-*fasterq-dump is a tool from SRA-tools (the NCBI Sequence Read Archive toolkit)*
-
-*fasterq-dump does not support --gzip* 
-
+## (1) Conda env (SRA tools + helpers)
 ~~~
 # bash
 # Create a dedicated environment
@@ -42,10 +36,12 @@ conda activate sra
 which fasterq-dump
 fasterq-dump --version  #fasterq-dump : 3.2.1
 ~~~
+Note: fasterq-dump is faster but doesn’t gzip; we’ll compress with pigz.
 
-### 1.2) Downloads the sequencing run from NCBI SRA
+## (2) Fetch SRA & make FASTQ
+### (2.1) Fetch single case from NCBI SRA
 
-*download single .sra files* 
+**Download single .sra files**
 ~~~
 bash
 pwd # project_PRJNA1014743
@@ -59,7 +55,8 @@ prefetch --max-size 200G -O raw_test SRR26030910
 ls -lh raw_test/SRR26030905/ #check the file size 
 ~~~
 
-*copy-pasteable ways to bulk download .sra files* 
+### (2.2) Fetch batch case from NCBI SRA
+**Download batch .sra files**
 ~~~
 cut -d, -f2 meta/metadata.csv | tail -n +2 | tr -d '\r' | while read -r SRR; do
   [ -z "$SRR" ] && continue
@@ -76,15 +73,15 @@ This will produce files like:
 - raw/SRR26030909/SRR26030909.sra
 - raw/SRR26030910/SRR26030910.sra
 
-### 1.3) Converts .sra archive files into plain FASTQ files
-*convert single file* 
+### (2.3) Converts .sra archive files into plain FASTQ files
+**Convert single file**
 ~~~
 #bash
 mkdir -p raw_fastq
 fasterq-dump raw/SRR26030905/SRR26030905.sra -e 8 -p --split-files -t tmp -O raw_fastq/
 ~~~
 
-*convert batch file* 
+**Convert batch file**
 ~~~
 #bash
 pwd #project_PRJNA1014743
@@ -108,18 +105,17 @@ This will produce files like:
 - raw_fastq/SRR26030910_1.fastq
 - raw_fastq/SRR26030910_2.fastq
 
-## 2) Raw data QC
-### 2.1) intsall fastqc
+## (3) Raw data QC
+### (3.1) Intsall fastqc
 ~~~
 # bash
-conda install -c bioconda fastqc
-fasterq-dump --version  #FastQC v0.12.1
+conda activate sra
 
 conda install -c bioconda multiqc
 multiqc --version  #multiqc, version 1.30     
 ~~~
 
-### 2.2) run QC
+### (3.2) Run QC
 ~~~
 # bash
 mkdir -p qc/fastqc qc/multiqc
@@ -129,6 +125,7 @@ fastqc -t 6 -o qc/fastqc raw_fastq/*.fastq
 # Summarize reports
 multiqc -o qc/multiqc qc/fastqc
 ~~~
+
 This will produce files like:
 - qc/fastqc/SRR26030905_1.fastqc.html
 - qc/fastqc/SRR26030905_1.fastqc.zip
@@ -137,15 +134,19 @@ This will produce files like:
 ...
 
 - qc/multiqc/multiqc_report.html
+~~~
+qc/multiqc/multiqc_report.html
+
 1. ~25M reads per sample
 2. ~50% GC content (normal for human)
 3. Low adapter contamination
 4. <1% overrepresented sequences
 5. Quality scores are consistently high
+~~~
 
+## (4) Qulification
+### (4.1) Build a decoy-aware index
 
-## 3) Quantification 
-### 3.1) Build a decoy-aware index
 ~~~
 # bash
 # ref/
@@ -200,38 +201,14 @@ This will produce files like:
 - Building perfect hash
 - Index built successfully
 
-### 3.2) Build a Transcript-only index and Quantify
-#### 3.2.1) Build a Transcript-only index (fastest & smallest)
-~~~
-# In project_PRJNA1014743/ref
-# Build a small, fast index (no decoys)
-salmon index \
-  -t gencode.v44.transcripts.fa \
-  -i salmon_gencode_v44_txonly_idx \
-  -p 16    # increase if your node can handle it
-~~~
-- Pros: tiny, fast, low RAM.
-- Cons: slightly less protection against spurious mappings to unannotated genomic sequence (usually fine for bulk RNA-seq).
 
-#### 3.2.2) Quantify
-~~~
-# Paired-end example
-salmon quant \
-  -i ref/salmon_gencode_v44_txonly_idx \
-  -l A \
-  -1 raw_fastq/SRR26030905_1.fastq \
-  -2 raw_fastq/SRR26030905_2.fastq \
-  -p 16 --validateMappings \
-  -o quant/SRR26030905
-~~~
-
-### 3.3) Build a STAR index and Quantify
-#### 3.3.1) Build a STAR index
+### (4.2) Build a STAR index and Quantify
+#### (4.2.1) Build a STAR index
 First, prepare the data:
 - Genome FASTA (e.g., GRCh38.primary_assembly.genome.fa)
 - GENCODE annotation GTF (e.g., gencode.v44.annotation.gtf)
 
-star_genome.sh
+**Job Script:star_genome.sh**
 ~~~
 #!/bin/bash
 #BSUB -J star_genome
@@ -266,15 +243,13 @@ STAR \
   --limitGenomeGenerateRAM 170000000000
 ~~~
 
-star_genome_build.lsf
+**Job Submit:star_genome.sh**
 ~~~
 # bash
 bsub < star_genome.sh
-# check the running process
-bjobs
 ~~~
 
-monitor 
+**Job Monitor**
 ~~~
 bjobs -w -u $USER            # see when it’s RUN and on which node
 bpeek -f <JOBID>             # live stdout once RUN (replace with actual ID)
@@ -283,7 +258,7 @@ tail -f star_genome.<JOBID>.err
 tail -f STAR_index_gencodev44/Log.out
 ~~~
 
-### (3.3) Map reads (paired-end; GeneCounts)
+### (4.2.2) Map reads (paired-end; GeneCounts)
 **Job Script: mapping.sh**
 ~~~
 #!/usr/bin/env bash
@@ -481,7 +456,7 @@ echo "Project summary written to: ${summary}"
 
 ~~~
 
-**Submit Job**
+**Job Submit**
 ~~~
 mkdir -p logs mapping
 bsub < mapping.sh
@@ -505,18 +480,141 @@ mapping/SRR26030909
 mapping/SRR26030910
 ~~~
 
-## (3.4) Build a counts matrix (auto-detect strandedness)
+## (4.3) Build a counts matrix (auto-detect strandedness)
 **Job Script: make_counts.py**
 ~~~
+#!/usr/bin/env python3
+import argparse, sys
+from pathlib import Path
+import pandas as pd
+import re
 
+def parse_args():
+    p = argparse.ArgumentParser(description="Merge STAR ReadsPerGene.out.tab into a counts matrix.")
+    p.add_argument("--mapping-root", required=True,
+                   help="Path to the directory containing per-sample folders (e.g., PROJECT/mapping)")
+    p.add_argument("--strand", choices=["unstranded","firststrand","secondstrand"],
+                   default="secondstrand",
+                   help="Which STAR column to use: unstranded (col2), firststrand (col3), secondstrand (col4). Default: secondstrand")
+    p.add_argument("--out", default="counts_matrix.tsv",
+                   help="Output TSV (genes x samples). Default: counts_matrix.tsv")
+    p.add_argument("--summary-out", default="mapping_qc_summary.tsv",
+                   help="Optional summary TSV from Log.final.out and totals. Default: mapping_qc_summary.tsv")
+    p.add_argument("--gene-column-name", default="gene_id",
+                   help="Name of the first column (gene IDs). Default: gene_id")
+    return p.parse_args()
 
+def read_star_counts(fp: Path, strand_choice: str) -> pd.Series:
+    # STAR columns: 1=gene_id, 2=unstranded, 3=firststrand, 4=secondstrand
+    usecol = {"unstranded": 1, "firststrand": 2, "secondstrand": 3}[strand_choice]
+    df = pd.read_csv(fp, sep="\t", header=None, comment=None)
+    # drop STAR’s N_* rows
+    df = df[~df[0].astype(str).str.startswith("N_")]
+    # ensure numeric
+    df[usecol] = pd.to_numeric(df[usecol], errors="coerce").fillna(0).astype(int)
+    s = pd.Series(df[usecol].values, index=df[0].astype(str))
+    return s
+
+def sample_name_from_readspergene(path: Path) -> str:
+    # <mapping>/<sample>/<sample>_ReadsPerGene.out.tab
+    # Use folder name as sample when possible
+    return path.parent.name
+
+def parse_log_final_out(fp: Path) -> dict:
+    # Pull a few useful metrics; be robust to spacing
+    metrics = {"sample": fp.parent.name}
+    keymap = {
+        "Number of input reads": "input_reads",
+        "Uniquely mapped reads %": "uniquely_mapped_percent",
+        "Average input read length": "avg_read_len",
+        "Mismatch rate per base, %": "mismatch_rate_percent",
+        "Percentage of reads mapped to multiple loci": "multi_mapped_percent",
+        "Percentage of reads unmapped: too many mismatches": "unmapped_too_many_mm_percent",
+        "Percentage of reads unmapped: too short": "unmapped_too_short_percent",
+        "Percentage of reads unmapped: other": "unmapped_other_percent",
+    }
+    try:
+        with open(fp) as f:
+            for line in f:
+                if "|" not in line: 
+                    continue
+                k, v = line.split("|", 1)
+                k = k.strip()
+                v = v.strip().rstrip("%")
+                if k in keymap:
+                    # numeric if possible
+                    try:
+                        metrics[keymap[k]] = float(v.replace(",", ""))
+                    except ValueError:
+                        metrics[keymap[k]] = v
+    except FileNotFoundError:
+        pass
+    return metrics
+
+def main():
+    args = parse_args()
+    root = Path(args.mapping_root)
+    if not root.is_dir():
+        sys.exit(f"ERROR: mapping root not found: {root}")
+
+    pattern = "**/*_ReadsPerGene.out.tab"
+    files = sorted(root.glob(pattern))
+    if not files:
+        sys.exit(f"ERROR: No ReadsPerGene.out.tab files under {root}")
+
+    all_series = []
+    sample_order = []
+    qc_rows = []
+    for f in files:
+        sname = sample_name_from_readspergene(f)
+        try:
+            s = read_star_counts(f, args.strand)
+        except Exception as e:
+            print(f"WARNING: failed to read {f}: {e}", file=sys.stderr)
+            continue
+        s.name = sname
+        all_series.append(s)
+        sample_order.append(sname)
+
+        # Try to parse Log.final.out & total counts
+        logf = f.with_name(f.name.replace("_ReadsPerGene.out.tab","_Log.final.out"))
+        qc = parse_log_final_out(logf)
+        # total counts from selected strand
+        total_counts = int(s.sum())
+        qc["total_counts_selected_strand"] = total_counts
+        qc_rows.append(qc)
+
+    if not all_series:
+        sys.exit("ERROR: no valid counts were read.")
+
+    # Align by gene ID union, fill missing with 0
+    mat = pd.concat(all_series, axis=1).fillna(0).astype(int)
+    mat = mat.loc[sorted(mat.index)]
+    # Order columns by discovered sample order
+    mat = mat.loc[:, sample_order]
+
+    # Write matrix
+    mat.index.name = args.gene_column_name
+    mat.to_csv(args.out, sep="\t")
+
+    # Write QC summary (if any)
+    if qc_rows:
+        qc_df = pd.DataFrame(qc_rows)
+        # Move sample to first column if present
+        cols = ["sample"] + [c for c in qc_df.columns if c != "sample"]
+        qc_df = qc_df.reindex(columns=cols)
+        qc_df.to_csv(args.summary_out, sep="\t", index=False)
+
+    print(f"Wrote counts matrix: {args.out}")
+    if qc_rows:
+        print(f"Wrote QC summary: {args.summary_out}")
+    print(f"Strand column used: {args.strand}")
+
+if __name__ == "__main__":
+    main()
 ~~~
 
-
-
-**submit job**
-
-
+**Submit job**
 ~~~
 #bash 
 conda install -n sra pandas -y
@@ -528,46 +626,7 @@ This will produce files like:
 - Counts: **counts_matrix.tsv**
 - QC:counts_matrix.tsv
 
-### 3.3) Quantify with recommended flags
-Bias correction and selective alignment generally improve estimates.
-~~~
-# adjust sample names to match your files (yours looked like SRR* earlier)
-mkdir -p ../quant
-for S in CTRL1 CTRL2 CTRL3 TRT1 TRT2 TRT3
-do
-  salmon quant \
-    -i refs/salmon_gencode_v44_decoy \
-    -l A \
-    -1 raw_fastq/${S}_R1.fastq \
-    -2 raw_fastq/${S}_R2.fastq \
-    --validateMappings \
-    --gcBias \
-    --seqBias \
-    --numBootstraps 100 \
-    -p 8 \
-    -o quant/$S
-done
-~~~
-
-### 3) Prepare tx2gene for gene-level summarization
-You’ll need this for tximport → DESeq2/edgeR.
-~~~
-# From the GENCODE GTF
-awk '$3=="transcript" { 
-  tx=""; gene=""; 
-  for(i=9;i<=NF;i++){
-    if($i~/^transcript_id/) {tx=$(i+1); gsub(/"|;/, "", tx)}
-    if($i~/^gene_id/)       {gene=$(i+1); gsub(/"|;/, "", gene)}
-  }
-  if(tx!="" && gene!="") print tx"\t"gene
-}' gencode.v44.annotation.gtf > tx2gene_gencode_v44.tsv
-~~~
-
-
-
-
-## 4) Import counts into R
-
+## (5) Import counts into R
 ~~~
 library(tximport)
 library(DESeq2)
@@ -593,7 +652,7 @@ keep <- rowSums(counts(dds) >= 10) >= 2
 dds <- dds[keep,]
 ~~~
 
-## 5) QC & Visualization
+## (6) QC & Visualization
 ~~~
 vsd <- vst(dds)
 
@@ -604,7 +663,7 @@ dists <- dist(t(assay(vsd)))
 pheatmap(as.matrix(dists))
 ~~~
 
-## 6) Differential Expression
+## (7) Differential Expression
 
 ~~~
 dds <- DESeq(dds)
@@ -619,7 +678,7 @@ write.csv(res_sig, "DE_genes.csv", row.names=TRUE)
 ~~~
 
 
-## 7) Visualization (Volcano & Heatmap)
+## (8) Visualization (Volcano & Heatmap)
 ~~~
 library(ggplot2)
 
@@ -632,11 +691,9 @@ ggplot(res_df, aes(x=log2FoldChange, y=-log10(padj))) +
 topgenes <- head(order(res$padj), 30)
 pheatmap(assay(vsd)[topgenes,], cluster_rows=TRUE, cluster_cols=TRUE,
          annotation_col=coldata)
-
 ~~~
 
-
-## 8) Pathway Enrichment (GSEA)
+## (9) Pathway Enrichment (GSEA)
 ~~~
 library(fgsea)
 library(msigdbr)
@@ -651,7 +708,7 @@ fg <- fgsea(msig, stats=ranks, minSize=15, maxSize=500, nperm=10000)
 write.csv(fg[order(fg$padj),], "GSEA_results.csv")
 ~~~
 
-## 9) Deliverables
+## (10) Deliverables
 
 At the end you would have:
 
