@@ -300,6 +300,7 @@ This will produce files like:
 logs/star_map_gencodev44_PE.269463854.err
 logs/star_map_gencodev44_PE.269463854.out
 
+~~~
 mapping/SRR26030905├─ SRR26030905__STARgenome         
                    ├─ SRR26030905__STARpass1
                    ├─ SRR26030905_Aligned.sortedByCoord.out.bam
@@ -311,7 +312,7 @@ mapping/SRR26030907
 mapping/SRR26030908
 mapping/SRR26030909
 mapping/SRR26030910
-
+~~~
 
 ## (3.4) Build a counts matrix (auto-detect strandedness)
 **Job Script: mapping.py**
