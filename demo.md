@@ -169,7 +169,7 @@ set -euo pipefail
 eval "$(conda shell.bash hook)"
 conda activate sra
 
-cd /research/groups/yanggrp/home/glin/work_2025/Sep/project_PRJNA1014743/ref
+cd ***Sep/project_PRJNA1014743/ref
 rm -rf STAR_index_gencodev44 _STARtmp
 mkdir -p STAR_index_gencodev44
 
@@ -217,10 +217,10 @@ set -euo pipefail
 # =========================
 # Project-specific settings
 # =========================
-PROJECT="/research/groups/yanggrp/home/glin/work_2025/Sep/project_PRJNA1014743"
+PROJECT="***/Sep/project_PRJNA1014743"
 FASTQ_DIR="${PROJECT}/raw_fastq"   # paired-end FASTQs live here
 GENOME_DIR="${PROJECT}/ref/STAR_index_gencodev44"
-GTF="/research/groups/yanggrp/home/glin/work_2025/Sep/project_PRJNA1014743/ref/gencode.v44.annotation.gtf"
+GTF="***/Sep/project_PRJNA1014743/ref/gencode.v44.annotation.gtf"
 OUTROOT="${PROJECT}/mapping"       # all results go here
 THREADS=${LSB_DJOB_NUMPROC:-16}    # LSF core count (default 16)
 
