@@ -525,8 +525,8 @@ python3 -c "import pandas as pd; print(pd.__version__)" #2.3.2
 python3 make_counts.py
 ~~~
 This will produce files like:
-- Counts: **raw_counts.csv**
-- QC:     qc.csv
+- Counts: **counts_matrix.tsv**
+- QC:counts_matrix.tsv
 
 
 
