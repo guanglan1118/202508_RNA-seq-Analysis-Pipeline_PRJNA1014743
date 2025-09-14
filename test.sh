@@ -1,2 +1,1 @@
-aldfjaldkjf:wq
-
+#/bash/bin/env bash
